@@ -1,0 +1,43 @@
+name: Stack Upload
+description: Run stack-sdist and upload the result to Hackage
+inputs:
+  pvp-bounds:
+    description: "--pvp-bounds to use (none, lower, upper, or both)"
+    required: true
+    default: none
+outputs: {}
+runs:
+  using: composite
+  steps:
+    - name: Release
+      shell: bash
+      run: |
+        if [ -z "$HACKAGE_API_KEY" ]; then
+          echo "You must set $HACKAGE_API_KEY in the environment" >&2
+          exit 1
+        fi
+
+        tmp=$(mktemp -d)
+        stack sdist --tar-dir "$tmp" --pvp-bounds ${{ inputs.pvp-bounds }} .
+        archive=$(find "$tmp" -name '*.tar.gz' -print)
+
+        if [ -z "$archive" ]; then
+          echo "stack-sdist did not produce an archive?" >&2
+          exit 1
+        fi
+
+        http_code=$(
+          curl \
+            --silent \
+            --header "Accept: text/plain" \
+            --header "Authorization: X-ApiKey $HACKAGE_API_KEY" \
+            --form "package=@$archive" \
+            --output /dev/stderr \
+            --write-out '%{http_code}' \
+            https://hackage.haskell.org/packages/
+        )
+
+        if (( http_code >= 400 )); then
+          echo "Upload not successful: $http_code"
+          exit 1
+        fi
