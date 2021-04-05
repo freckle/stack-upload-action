@@ -26,6 +26,7 @@ runs:
           exit 1
         fi
 
+        echo "Uploading to Hackage"
         http_code=$(
           curl \
             --silent \
@@ -36,6 +37,8 @@ runs:
             --write-out '%{http_code}' \
             https://hackage.haskell.org/packages/
         )
+
+        echo "Upload complete ($http_code)"
 
         if (( http_code >= 400 )); then
           echo "Upload not successful: $http_code"
