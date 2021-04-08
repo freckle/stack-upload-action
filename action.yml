@@ -1,6 +1,10 @@
 name: Stack Upload
 description: Run stack-sdist and upload the result to Hackage
 inputs:
+  working-directory:
+    description: "Working directory for run commands"
+    required: true
+    default: .
   pvp-bounds:
     description: "--pvp-bounds to use (none, lower, upper, or both)"
     required: true
@@ -11,6 +15,7 @@ runs:
   steps:
     - name: Release
       shell: bash
+      working-directory: ${{ inputs.working-directory }}
       run: |
         if [ -z "$HACKAGE_API_KEY" ]; then
           echo "You must set $HACKAGE_API_KEY in the environment" >&2

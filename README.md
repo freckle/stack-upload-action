@@ -18,6 +18,7 @@ jobs:
 
 ## Inputs
 
+- `working-directory`: directory to work in, default is `.`
 - `pvp-bounds`: `--pvp-bounds` argument to pass, default is `none`.
 
 ## FAQ
