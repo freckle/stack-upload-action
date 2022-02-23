@@ -6,13 +6,27 @@ inputs:
     required: true
     default: .
   pvp-bounds:
-    description: "--pvp-bounds to use (none, lower, upper, or both)"
+    description: "--pvp-bounds to use: none, lower (default), upper, or both"
     required: true
-    default: none
+    default: lower
 outputs: {}
 runs:
   using: composite
   steps:
+    - if: ${{ inputs.pvp-bounds == 'lower' }}
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        if [[ -n "$STACK_YAML" ]]; then
+          exit 0 # respect
+        fi
+
+        read -r stack_yaml < \
+          <(find . -name 'stack-lts-*.yaml' | sort -V; echo stack.yaml)
+
+        echo "Setting STACK_YAML=$stack_yaml, to inform --pvp-bounds=lower"
+        echo "STACK_YAML=$stack_yaml" >> '${{ github.env }}'
+
     - name: Release
       shell: bash
       working-directory: ${{ inputs.working-directory }}
