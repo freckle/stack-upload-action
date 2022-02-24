@@ -12,7 +12,7 @@ jobs:
       HACKAGE_API_KEY: ${{ secrets.HACKAGE_API_KEY }}
     steps:
       - uses: actions/checkout@v2
-      - uses: freckle/stack-upload-action@main
+      - uses: freckle/stack-upload-action@v2
 ```
 
 ## Inputs
@@ -22,10 +22,11 @@ jobs:
 
 ## Environment
 
-- `STACK_YAML`: the `stack.yaml` to use for bounds-setting (optional)
 - `HACKAGE_API_KEY`: an Authentication Token with rights to upload (required)
 
   See `https://hackage.haskell.org/user/{username}/manage` to create one.
+
+- `STACK_YAML`: the `stack.yaml` to use for bounds-setting (optional)
 
 ## PVP Bounds
 
