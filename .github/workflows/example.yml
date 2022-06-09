@@ -1,0 +1,18 @@
+name: Example
+
+on:
+  pull_request:
+
+jobs:
+  example:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - id: release
+        uses: .
+        with:
+          working-directory: example
+          upload: 'false'
+
+      - run: |
+          echo "TODO: verify bounds in ${{ steps.release.outputs.archive }}"
