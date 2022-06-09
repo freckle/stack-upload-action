@@ -28,22 +28,25 @@ runs:
           exit 0 # respect
         fi
 
+        echo "::group::Inferring stack.yaml to use"
         read -r stack_yaml < \
           <(find . -name 'stack-lts-*.yaml' | sort -V; echo stack.yaml)
 
         echo "Setting STACK_YAML=$stack_yaml, to inform --pvp-bounds=lower"
         echo "STACK_YAML=$stack_yaml" >> '${{ github.env }}'
+        echo "::endgroup::"
 
     - id: release
       name: Release
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       run: |
+        echo "::group::Building archive with stack sdist"
         tmp=$(mktemp -d)
         stack sdist --tar-dir "$tmp" --pvp-bounds ${{ inputs.pvp-bounds }} .
         archive=$(find "$tmp" -name '*.tar.gz' -print)
-
         echo "::set-output name=archive::$archive"
+        echo "::endgroup::"
 
         if [ -z "$archive" ]; then
           echo "stack-sdist did not produce an archive?" >&2
@@ -60,7 +63,7 @@ runs:
           exit 1
         fi
 
-        echo "Uploading to Hackage"
+        echo "::group::Uploading to Hackage"
         http_code=$(
           curl \
             --silent \
@@ -73,6 +76,7 @@ runs:
         )
 
         echo "Upload complete ($http_code)"
+        echo "::endgroup::"
 
         if (( http_code >= 400 )); then
           echo "Upload not successful: $http_code"
