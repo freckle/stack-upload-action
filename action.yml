@@ -9,7 +9,14 @@ inputs:
     description: "--pvp-bounds to use: none, lower (default), upper, or both"
     required: true
     default: lower
-outputs: {}
+  upload:
+    description: "Upload the package, can be disabled for testing"
+    required: true
+    default: "true"
+outputs:
+  archive:
+    description: "Path to distribution archive created"
+    value: ${{ steps.release.outputs.archive }}
 runs:
   using: composite
   steps:
@@ -27,21 +34,29 @@ runs:
         echo "Setting STACK_YAML=$stack_yaml, to inform --pvp-bounds=lower"
         echo "STACK_YAML=$stack_yaml" >> '${{ github.env }}'
 
-    - name: Release
+    - id: release
+      name: Release
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       run: |
-        if [ -z "$HACKAGE_API_KEY" ]; then
-          echo "You must set $HACKAGE_API_KEY in the environment" >&2
-          exit 1
-        fi
-
         tmp=$(mktemp -d)
         stack sdist --tar-dir "$tmp" --pvp-bounds ${{ inputs.pvp-bounds }} .
         archive=$(find "$tmp" -name '*.tar.gz' -print)
 
+        echo "::set-output name=archive::$archive"
+
         if [ -z "$archive" ]; then
           echo "stack-sdist did not produce an archive?" >&2
+          exit 1
+        fi
+
+        if [ '${{ inputs.upload }}' != 'true' ]; then
+          echo "Skipping upload due to inputs"
+          exit 0
+        fi
+
+        if [ -z "$HACKAGE_API_KEY" ]; then
+          echo "You must set $HACKAGE_API_KEY in the environment" >&2
           exit 1
         fi
 
