@@ -29,11 +29,13 @@ runs:
         fi
 
         echo "::group::Inferring stack.yaml to use"
-        read -r stack_yaml < \
-          <(find . -name 'stack-lts-*.yaml' | sort -V; echo stack.yaml)
+        read -r stack_yaml < <(find . -name 'stack-lts-*.yaml' | sort -V)
 
-        echo "Setting STACK_YAML=$stack_yaml, to inform --pvp-bounds=lower"
-        echo "STACK_YAML=$stack_yaml" >> '${{ github.env }}'
+        if [[ -n "$stack_yaml" ]]; then
+          echo "Setting STACK_YAML=$stack_yaml, to inform --pvp-bounds=lower"
+          echo "STACK_YAML=$stack_yaml" >> $GITHUB_ENV
+        fi
+
         echo "::endgroup::"
 
     - id: release
