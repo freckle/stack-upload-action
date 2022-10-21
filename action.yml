@@ -47,7 +47,7 @@ runs:
         tmp=$(mktemp -d)
         stack sdist --tar-dir "$tmp" --pvp-bounds ${{ inputs.pvp-bounds }} .
         archive=$(find "$tmp" -name '*.tar.gz' -print)
-        echo "::set-output name=archive::$archive"
+        echo "archive=$archive" >> "$GITHUB_OUTPUT"
         echo "::endgroup::"
 
         if [ -z "$archive" ]; then
