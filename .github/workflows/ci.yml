@@ -27,7 +27,34 @@ jobs:
           )
 
           if [ "$actual" != "$expected" ]; then
-            echo "Lower bounds were not set based on lts-16.31" >&2
+            echo "Lower bounds were not set based on stack-lts-16.31.yaml" >&2
+            echo "Expected $expected, got $actual" >&2
+            exit 1
+          fi
+
+  test-no-lts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - id: release
+        uses: ./
+        with:
+          working-directory: example-no-lts
+          upload: 'false'
+
+      - name: Assert
+        run: |
+          cabal_file=example-0.0.0.0/example.cabal
+          expected='>=4.15.1.0'
+          actual=$(
+            tar xzf '${{ steps.release.outputs.archive }}' "$cabal_file" -O |
+              grep base |
+              head -n 1 |
+              awk '{print $3}'
+          )
+
+          if [ "$actual" != "$expected" ]; then
+            echo "Lower bounds were not set based on stack.yaml" >&2
             echo "Expected $expected, got $actual" >&2
             exit 1
           fi
