@@ -1,0 +1,7 @@
+name: example
+version: 0.0.0.0
+synopsis: An example package
+license: MIT
+library:
+  dependencies:
+    - base < 5

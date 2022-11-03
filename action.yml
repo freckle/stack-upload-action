@@ -29,9 +29,8 @@ runs:
         fi
 
         echo "::group::Inferring stack.yaml to use"
-        read -r stack_yaml < <(find . -name 'stack-lts-*.yaml' | sort -V)
 
-        if [[ -n "$stack_yaml" ]]; then
+        if read -r stack_yaml < <(find . -name 'stack-lts-*.yaml' | sort -V); then
           echo "Setting STACK_YAML=$stack_yaml, to inform --pvp-bounds=lower"
           echo "STACK_YAML=$stack_yaml" >> $GITHUB_ENV
         fi
@@ -42,10 +41,13 @@ runs:
       name: Release
       shell: bash
       working-directory: ${{ inputs.working-directory }}
+      env:
+        PVP_BOUNDS: ${{ inputs.pvp-bounds }}
+        UPLOAD: ${{ inputs.upload }}
       run: |
         echo "::group::Building archive with stack sdist"
         tmp=$(mktemp -d)
-        stack sdist --tar-dir "$tmp" --pvp-bounds ${{ inputs.pvp-bounds }} .
+        stack sdist --tar-dir "$tmp" --pvp-bounds "$PVP_BOUNDS" .
         archive=$(find "$tmp" -name '*.tar.gz' -print)
         echo "archive=$archive" >> "$GITHUB_OUTPUT"
         echo "::endgroup::"
@@ -55,7 +57,7 @@ runs:
           exit 1
         fi
 
-        if [ '${{ inputs.upload }}' != 'true' ]; then
+        if [ "$UPLOAD" != 'true' ]; then
           echo "Skipping upload due to inputs"
           exit 0
         fi
