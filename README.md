@@ -1,3 +1,20 @@
+**ARCHIVED**: support for API key authentication was added to Stack some time
+ago, and the version installed on GitHub is new enough. This means this
+action is longer necessary and we will not be maintianing it.
+
+The following is equivalent to using this action:
+
+```yaml
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      HACKAGE_KEY: ${{ secrets.HACKAGE_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: stack upload --pvp-bounds lower
+```
+
 # Stack Upload Action
 
 GitHub Action to run `stack sdist` and upload to Hackage using an API Key.
